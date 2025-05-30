@@ -1,0 +1,93 @@
+{
+  "name": "@floating-ui/solid",
+  "version": "0.1.0",
+  "@rollingversions": {
+    "baseVersion": [
+      0,
+      1,
+      0
+    ]
+  },
+  "description": "Floating UI for SolidJS",
+  "author": {
+    "name": "Martin Rapp",
+    "url": "https://github.com/madaxen86"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "sideEffects": false,
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "solid": "./dist/source/index.js",
+      "import": "./dist/esm/index.js",
+      "browser": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint --fix --ext .ts,.tsx .",
+    "test": "vitest",    
+    "build": "NODE_ENV=build rollup -c",
+    "build-watch": "NODE_ENV=build rollup --watch -c ./rollup.config.js"
+  },
+  "license": "MIT",
+  "bugs": "https://github.com/floating-ui/floating-ui",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/floating-ui/floating-ui.git",
+    "directory": "packages/solid"
+  },
+  "homepage": "https://floating-ui.com/docs/",
+  "keywords": [
+    "tooltip",
+    "popover",
+    "dropdown",
+    "menu",
+    "popup",
+    "positioning",
+    "solid",
+    "autocomplete",
+    "keynavigation"
+  ],
+  "peerDependencies": {
+  },
+  "dependencies": {
+    "@floating-ui/dom": "workspace:^",
+    "@floating-ui/utils": "workspace:^",
+    "@solid-primitives/map": "^0.4.8",
+    "@solid-primitives/utils": "^6.2.1",
+    "style-to-object": "^1.0.0",
+    "tabbable": "^6.2.0"
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.23.2",
+    "@babel/preset-typescript": "^7.23.2",
+    "@rollup/plugin-commonjs": "^28.0.3",
+    "@solid-primitives/media": "^2.2.5",
+    "@solid-primitives/refs": "^1.0.5",
+    "@solidjs/testing-library": "^0.8.4",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/user-event": "^14.5.1",
+    "@typescript-eslint/eslint-plugin": "^8.33.0",
+    "@typescript-eslint/parser": "^8.33.0",
+    "babel-preset-solid": "^1.8.2",
+    "eslint": "^9.27.0",
+    "eslint-plugin-solid": "^0.14.5",
+    "jsdom": "^26.1.0",
+    "rollup-plugin-summary": "^3.0.1",
+    "rollup-preset-solid": "^3.0.0",
+    "solid-js": "^1.8.5",
+    "vite": "^6.3.5",
+    "vite-plugin-solid": "^2.7.0",
+    "vitest": "^3.1.4"
+  }
+}
