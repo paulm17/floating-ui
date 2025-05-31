@@ -1,20 +1,11 @@
 {
-  "name": "@kachurun/storybook-solid-template",
+  "name": "storybook-react-template",
   "version": "9.0.6",
   "author": "kachurun",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/kachurun/create-solid-storybook/issues"
-  },
-  "homepage": "https://github.com/kachurun/create-solid-storybook#readme",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/kachurun/create-solid-storybook.git",
-    "directory": "packages/storybook-solid-template"
-  },
   "scripts": {
     "build": "storybook build",
-    "storybook": "storybook dev -p 6006",
+    "storybook": "storybook dev -p 6007",
     "test": "vitest --run --update",
     "preview-storybook": "serve storybook-static"
   },

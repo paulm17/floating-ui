@@ -8,9 +8,9 @@ import {
 } from "@floating-ui/solid";
 import { createSignal } from "solid-js";
 
-export default { title: 'Solid: useClick' };
+export default { title: 'Solid: useFloating' };
 
-export function UseClick() {
+export function UseFloating() {
   const [isOpen, setIsOpen] = createSignal(false);
   const [arrowRef, setArrowRef] = createSignal(null);
 
