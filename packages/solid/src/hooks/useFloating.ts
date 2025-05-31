@@ -135,7 +135,7 @@ export function useFloating<R extends ReferenceElement>(
   const tree = useUnsafeFloatingTree<R>();
   createEffect(() => {
     if (!tree?.()) return;
-    rootCtx.dataRef.openEvent = dataRef.openEvent;
+    rootCtx.dataRef().openEvent = dataRef.openEvent;
     const node = tree()?.nodesRef?.find((n) => n.id === nodeId);
     if (node) node.context = context() as unknown as FloatingContext<R>;
   });

@@ -26,6 +26,7 @@ export default <StorybookConfig>{
                 'process.env': {},
                 __DEV__: true,
             },
+            plugins: [(await import('@tailwindcss/vite')).default()],
         });
     },
 };

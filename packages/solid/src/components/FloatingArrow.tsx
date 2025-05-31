@@ -99,7 +99,7 @@ export const FloatingArrow: Component<
   ]);
 
   // Custom CSS string parser to replace style-to-object dependency
-  function parseStyleString(styleStr) {
+  function parseStyleString(styleStr: string) {
     const styleObj = {};
     
     if (!styleStr || typeof styleStr !== 'string') {
@@ -125,6 +125,7 @@ export const FloatingArrow: Component<
         const camelProperty = property.replace(/-([a-z])/g, (match, letter) => 
           letter.toUpperCase()
         );
+        // @ts-ignore
         styleObj[camelProperty] = value;
       }
     }

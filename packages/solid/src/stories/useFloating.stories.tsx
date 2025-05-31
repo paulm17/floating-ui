@@ -7,7 +7,6 @@ import {
   arrow,
 } from "@floating-ui/solid";
 import { createSignal } from "solid-js";
-import styles from './styles.module.css';
 
 export default { title: 'useFloating' };
 
@@ -39,24 +38,24 @@ export function UseFloating() {
   }[placement.split("-")[0]];
 
   return (
-    <div className={styles.container}>
-      <div className={styles.content}>
-        <h1 className={styles.title}>
-          Floating UI Test with CSS Modules
+    <div className="p-24 font-sans">
+      <div className="space-y-8">
+        <h1 className="text-3xl font-bold text-gray-800">
+          Floating UI Test with Tailwind
         </h1>
         
-        <div className={styles.buttonGroup}>
+        <div className="flex gap-4">
           <button
             ref={refs.setReference}
             onClick={() => setIsOpen(!isOpen())}
-            className={styles.primaryButton}
+            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
           >
             Toggle Tooltip
           </button>
           
           <button
             onClick={() => setIsOpen(false)}
-            className={styles.secondaryButton}
+            className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
           >
             Close
           </button>
@@ -69,36 +68,36 @@ export function UseFloating() {
               ...floatingStyles,
               zIndex: 1000,
             }}
-            className={styles.tooltip}
+            className="bg-gray-800 text-white p-4 rounded-lg shadow-lg border border-gray-600 max-w-xs"
           >
-            <div className={styles.tooltipText}>
+            <div className="text-sm">
               This is a floating tooltip! 🎉
               <br />
-              Current placement: <strong className={styles.placement}>{placement}</strong>
+              Current placement: <strong className="text-blue-300">{placement}</strong>
             </div>
             
             {/* Arrow */}
             <div
-              ref={setArrowRef}
+              ref={arrowRef}
               style={{
                 position: 'absolute',
                 left: arrowX != null ? `${arrowX}px` : '',
                 top: arrowY != null ? `${arrowY}px` : '',
                 [staticSide]: '-4px',
               }}
-              className={styles.arrow}
+              className="w-2 h-2 bg-gray-800 border border-gray-600 rotate-45"
             />
           </div>
         )}
 
-        <div className={styles.infoBox}>
-          <div className={styles.infoContent}>
-            <h3 className={styles.infoTitle}>Features demonstrated:</h3>
-            <div className={styles.infoText}>
+        <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
+          <div className="space-y-2">
+            <h3 className="font-semibold text-gray-800">Features demonstrated:</h3>
+            <div className="text-sm text-gray-600 leading-relaxed">
               • useFloating hook with auto-update<br />
               • Offset, flip, and shift middleware<br />
               • Arrow positioning<br />
-              • CSS Modules for styling<br />
+              • Tailwind CSS for styling<br />
               • Dynamic placement detection
             </div>
           </div>

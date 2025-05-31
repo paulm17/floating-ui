@@ -5,9 +5,9 @@
     "jsx": "preserve",
     "jsxImportSource": "solid-js"
   },
-  "include": [],
+  "include": ["src"],
   "references": [
-    {"path": "./tsconfig.lib.json"},
-    {"path": "./tsconfig.test.json"}
+    {"path": "../react-dom/tsconfig.lib.json"},
+    {"path": "../utils/tsconfig.lib.json"}
   ]
 }

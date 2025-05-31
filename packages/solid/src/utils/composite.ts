@@ -77,6 +77,7 @@ export function getGridNavigatedIndex(
     event,
     orientation,
     loop,
+    rtl,
     cols,
     disabledIndices,
     minIndex,
@@ -87,6 +88,7 @@ export function getGridNavigatedIndex(
     event: KeyboardEvent;
     orientation: 'horizontal' | 'vertical' | 'both';
     loop: boolean;
+    rtl: boolean;
     cols: number;
     disabledIndices: Array<number> | undefined;
     minIndex: number;
@@ -158,7 +160,7 @@ export function getGridNavigatedIndex(
   if (orientation === 'both') {
     const prevRow = floor(prevIndex / cols);
 
-    if (event.key === ARROW_RIGHT) {
+    if (event.key === (rtl ? ARROW_LEFT : ARROW_RIGHT)) {
       stop && stopEvent(event);
 
       if (prevIndex % cols !== cols - 1) {
@@ -185,7 +187,7 @@ export function getGridNavigatedIndex(
       }
     }
 
-    if (event.key === ARROW_LEFT) {
+    if (event.key === (rtl ? ARROW_RIGHT : ARROW_LEFT)) {
       stop && stopEvent(event);
 
       if (prevIndex % cols !== 0) {
@@ -220,7 +222,7 @@ export function getGridNavigatedIndex(
     if (isIndexOutOfBounds(elementsRef, nextIndex)) {
       if (loop && lastRow) {
         nextIndex =
-          event.key === ARROW_LEFT
+          event.key === (rtl ? ARROW_RIGHT : ARROW_LEFT)
             ? maxIndex
             : findNonDisabledIndex(elementsRef, {
                 startingIndex: prevIndex - (prevIndex % cols) - 1,

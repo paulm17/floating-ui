@@ -78,6 +78,18 @@ export type Prettify<T> = {
   // eslint-disable-next-line @typescript-eslint/ban-types
 } & unknown;
 
+export type OpenChangeReason =
+  | 'outside-press'
+  | 'escape-key'
+  | 'ancestor-scroll'
+  | 'reference-press'
+  | 'click'
+  | 'hover'
+  | 'focus'
+  | 'focus-out'
+  | 'list-navigation'
+  | 'safe-polygon';
+
 export type UseFloatingData = Prettify<
   ComputePositionReturn & {isPositioned: boolean}
 >;
@@ -108,6 +120,7 @@ export type UseFloatingReturn<R extends ReferenceType = ReferenceType> =
 export type UseFloatingOptions<R extends ReferenceType = ReferenceType> =
   Prettify<
     Partial<ComputePositionConfig> & {
+      rootContext?: FloatingRootContext<R>;
       /**
        * A callback invoked when both the reference and floating elements are
        * mounted, and cleaned up when either is unmounted. This is useful for
@@ -182,12 +195,32 @@ export interface ContextData {
   [key: string]: any;
 }
 
+export interface FloatingRootContext<RT extends ReferenceType = ReferenceType> {
+  dataRef: Accessor<ContextData>;
+  open: boolean;
+  onOpenChange: (
+    open: boolean,
+    event?: Event,
+    reason?: OpenChangeReason,
+  ) => void;
+  elements: {
+    domReference: Element | null;
+    reference: RT | null;
+    floating: HTMLElement | null;
+  };
+  events: FloatingEvents;
+  floatingId: string | undefined;
+  refs: {
+    setPositionReference(node: ReferenceType | null): void;
+  };
+}
+
 export type FloatingContext<R extends ReferenceType = ReferenceType> = Omit<
   UseFloatingReturn<R>,
   'elements' | 'context'
 > & {
   open: Accessor<boolean>;
-  onOpenChange: (open: boolean, event?: Event) => void;
+  onOpenChange: (open: boolean, event?: Event, reason?: OpenChangeReason) => void;
   events: FloatingEvents;
   dataRef: ContextData; //React.MutableRefObject<ContextData>;
   nodeId: string | undefined;

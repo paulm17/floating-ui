@@ -19,7 +19,8 @@
         "preview-storybook": "serve storybook-static"
     },
     "dependencies": {
-        "@storybook/addon-styling-webpack": "^1.0.1"
+        "@tailwindcss/vite": "^4.1.8",
+        "tailwindcss": "^4.1.8"
     },
     "devDependencies": {
         "@kachurun/storybook-solid-vite": "^9.0.6",

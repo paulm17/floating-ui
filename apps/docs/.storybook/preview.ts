@@ -1,5 +1,6 @@
 import type { Preview } from '@kachurun/storybook-solid-vite';
 export const tags = ['autodocs'];
+import './tailwind.css';
 
 const preview: Preview = {
     parameters: {

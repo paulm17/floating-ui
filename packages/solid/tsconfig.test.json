@@ -1,0 +1,12 @@
+{
+  "extends": "config/tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "out-tsc",
+    "jsx": "preserve",
+    "jsxImportSource": "solid-js",
+    // FIXME: resize-observer-polyfill is conflicting with DOM typings
+    "skipLibCheck": true
+  },
+  "include": ["test", "vite.config.mts"],
+  "references": [{"path": "./tsconfig.lib.json"}]
+}

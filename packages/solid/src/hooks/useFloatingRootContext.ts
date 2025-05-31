@@ -99,7 +99,7 @@ export function useFloatingRootContext(
   // Return a single context object. We wrap it in createMemo so that
   // if `open` or `elements()` change, downstream users can react.
   return createMemo<FloatingRootContext>(() => ({
-    dataRef,
+    dataRef: () => dataRef,
     open,
     onOpenChange,
     elements: elements(),
