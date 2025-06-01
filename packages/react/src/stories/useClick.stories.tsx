@@ -5,12 +5,11 @@ import {
   offset,
   flip,
   shift,
-  useClick,
+  useClick as useReactClick,
   useDismiss,
   useRole,
   useInteractions,
   FloatingPortal,
-  arrow,
   useHover
 } from '@floating-ui/react';
 
@@ -38,7 +37,7 @@ export function UseClick() {
     whileElementsMounted: autoUpdate,
   });
 
-  const click = useClick(context);
+  const click = useReactClick(context);
   const dismiss = useDismiss(context);
   const role = useRole(context);
 
@@ -96,8 +95,7 @@ export function UseClick() {
               {...getReferenceProps()}
               className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
             >
-              {/* {isOpen ? 'Close Panel' : 'Open Panel'} */}
-              hello
+              {isOpen ? 'Close Panel' : 'Open Panel'}
             </button>
           </div>
 

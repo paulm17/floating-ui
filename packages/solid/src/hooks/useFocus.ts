@@ -33,7 +33,7 @@ export function useFocus<RT extends ReferenceType = ReferenceType>(
   props: UseFocusProps = {},
 ): Accessor<ElementProps> {
   const {open, onOpenChange, refs} = context();
-  const mergedProps = mergeProps({enabled: true, keyboardOnly: true}, props);
+  const mergedProps = mergeProps({enabled: true, keyboardOnly: false}, props);
   const {enabled, keyboardOnly} = destructure(mergedProps, {
     normalize: true,
   });

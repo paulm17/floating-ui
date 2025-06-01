@@ -72,6 +72,17 @@ const defaultUseDismissProps: Required<UseDismissProps> = {
   bubbles: null,
   capture: null,
 };
+
+// Helper function to safely check if an element is valid for getOverflowAncestors
+
+function isValidElementForOverflow(element: any): element is Element {
+  return element && 
+    isElement(element) && 
+    element.nodeType === Node.ELEMENT_NODE &&
+    typeof element.getBoundingClientRect === 'function' &&
+    element.isConnected; // Ensure element is actually in the DOM
+}
+
 export interface UseDismissProps {
   /**
    * Whether the Hook is enabled, including all internal Effects and event
@@ -378,6 +389,15 @@ export function useDismiss<RT extends ReferenceType = ReferenceType>(
     const {floating, reference} = context().refs;
     const domReference = reference() as Node | null;
     const floatingRef = floating();
+
+    // Wait for elements to be properly mounted in the DOM
+    if (!domReference || !floatingRef) {
+      return;
+    }
+
+    // Clear previous ancestors
+    ancestors = [];
+
     // batch(() => {
     context().dataRef.__escapeKeyBubbles = escapeKeyBubbles;
     context().dataRef.__outsidePressBubbles = outsidePressBubbles;
@@ -388,19 +408,37 @@ export function useDismiss<RT extends ReferenceType = ReferenceType>(
       doc.addEventListener(outsidePressEvent(), closeOnPressOutside);
 
     if (ancestorScroll()) {
-      if (isElement(domReference)) {
-        ancestors = getOverflowAncestors(domReference);
-      }
+      // Use queueMicrotask to ensure DOM is fully updated
+      queueMicrotask(() => {
+        if (isValidElementForOverflow(domReference)) {
+          try {
+            ancestors = getOverflowAncestors(domReference);
+          } catch (error) {
+            console.warn('Error getting overflow ancestors for reference:', error);
+            ancestors = [];
+          }
+        }
 
-      if (isElement(floatingRef)) {
-        ancestors = ancestors.concat(getOverflowAncestors(floatingRef));
-      }
+        if (isValidElementForOverflow(floatingRef)) {
+          try {
+            const floatingAncestors = getOverflowAncestors(floatingRef);
+            ancestors = ancestors.concat(floatingAncestors);
+          } catch (error) {
+            console.warn('Error getting overflow ancestors for floating element:', error);
+          }
+        }
 
-      // if (!isElement(domReference) && domReference && domReference.contextElement) {
-      //   ancestors = ancestors.concat(
-      //     getOverflowAncestors(domReference.contextElement)
-      //   );
-      // }
+        // Filter out visual viewport and ensure all ancestors are valid
+        ancestors = ancestors.filter(
+          (ancestor) => ancestor && ancestor !== doc.defaultView?.visualViewport,
+        );
+
+        ancestors.forEach((ancestor) => {
+          if (ancestor && typeof ancestor.addEventListener === 'function') {
+            ancestor.addEventListener('scroll', onScroll, {passive: true});
+          }
+        });
+      });
     }
 
     // Ignore the visual viewport for scrolling dismissal (allow pinch-zoom)
@@ -417,9 +455,11 @@ export function useDismiss<RT extends ReferenceType = ReferenceType>(
       escapeKey() && doc.removeEventListener('keydown', closeOnEscapeKeyDown);
       outsidePress &&
         doc.removeEventListener(outsidePressEvent(), closeOnPressOutside);
-      ancestors.forEach((ancestor) => {
-        ancestor.removeEventListener('scroll', onScroll);
-      });
+        ancestors.forEach((ancestor) => {
+          if (ancestor && typeof ancestor.removeEventListener === 'function') {
+            ancestor.removeEventListener('scroll', onScroll);
+          }
+        });
     });
   });
 

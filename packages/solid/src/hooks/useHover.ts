@@ -334,8 +334,9 @@ export function useHover<RT extends ReferenceType = ReferenceType>(
       open() && ref.addEventListener('mouseleave', onScrollMouseLeave);
       refs.floating()?.addEventListener('mouseleave', onScrollMouseLeave);
       move() && ref.addEventListener('mousemove', onMouseEnter, {once: true});
-      ref.addEventListener('mouseenter', onMouseEnter);
-      ref.addEventListener('mouseleave', onMouseLeave);
+      ref.addEventListener('mouseenter', (e) => onMouseEnter(e));
+      ref.addEventListener('mouseleave', (e) => onMouseLeave(e));
+
       onCleanup(() => {
         open() && ref.removeEventListener('mouseleave', onScrollMouseLeave);
         refs.floating()?.removeEventListener('mouseleave', onScrollMouseLeave);

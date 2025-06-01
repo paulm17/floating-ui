@@ -6,16 +6,16 @@ import {
   shift,
   arrow,
 } from "@floating-ui/solid";
-import { createSignal } from "solid-js";
+import { createEffect, createMemo, createSignal, JSX } from "solid-js";
 
-export default { title: 'Solid: useClick' };
+export default { title: 'Solid: useFloating' };
 
-export function UseClick() {
+export function UseFloating() {
   const [isOpen, setIsOpen] = createSignal(false);
   const [arrowRef, setArrowRef] = createSignal(null);
 
-  const { refs, floatingStyles, placement, middlewareData } = useFloating({
-    open: () => isOpen,
+  const floating = useFloating({
+    open: isOpen,
     onOpenChange: setIsOpen,
     middleware: [
       offset(10),
@@ -27,15 +27,25 @@ export function UseClick() {
     placement: "top",
   });
 
-  // Arrow positioning
-  const arrowX = middlewareData.arrow?.x;
-  const arrowY = middlewareData.arrow?.y;
-  const staticSide = {
-    top: "bottom",
-    right: "left",
-    bottom: "top",
-    left: "right",
-  }[placement.split("-")[0]];
+  const arrowStyle = createMemo(() => {
+    const arrowData = floating.middlewareData.arrow;
+    const sides = {
+      top: "bottom",
+      right: "left", 
+      bottom: "top",
+      left: "right",
+    };
+    
+    const side = sides[floating.placement.split("-")[0] as keyof typeof sides];
+    const style: JSX.CSSProperties = {
+      position: "absolute",
+      left: arrowData?.x != null ? `${arrowData?.x}px` : undefined,
+      top: arrowData?.y != null ? `${arrowData?.y}px` : undefined,
+    };
+    
+    (style as any)[side] = "-4px";
+    return style;
+  });
 
   return (
     <div class="p-24 font-sans">
@@ -46,7 +56,7 @@ export function UseClick() {
         
         <div class="flex gap-4">
           <button
-            ref={refs.setReference}
+            ref={floating.refs.setReference}
             onClick={() => setIsOpen(!isOpen())}
             class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
           >
@@ -63,9 +73,9 @@ export function UseClick() {
 
         {isOpen() && (
           <div
-            ref={refs.setFloating}
+            ref={floating.refs.setFloating}
             style={{
-              ...floatingStyles(),
+              ...floating.floatingStyles(),
               zIndex: 1000,
             }}
             class="bg-gray-800 text-white p-4 rounded-lg shadow-lg border border-gray-600 max-w-xs"
@@ -73,18 +83,13 @@ export function UseClick() {
             <div class="text-sm">
               This is a floating tooltip! 🎉
               <br />
-              Current placement: <strong class="text-blue-300">{placement}</strong>
+              Current placement: <strong class="text-blue-300">{floating.placement}</strong>
             </div>
             
             {/* Arrow */}
             <div
               ref={setArrowRef}
-              style={{
-                position: 'absolute',
-                left: arrowX != null ? `${arrowX}px` : '',
-                top: arrowY != null ? `${arrowY}px` : '',
-                [staticSide]: '-4px',
-              }}
+              style={arrowStyle()}
               class="w-2 h-2 bg-gray-800 border border-gray-600 rotate-45"
             />
           </div>

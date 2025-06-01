@@ -1,5 +1,14 @@
 import React, { useState } from 'react';
-import { FloatingOverlay as ReactFloatingOverlay, FloatingFocusManager, useFloating, autoUpdate, useClick, useDismiss, useRole, useInteractions } from '@floating-ui/react';
+import { 
+  FloatingOverlay as ReactFloatingOverlay, 
+  FloatingFocusManager, 
+  useFloating, 
+  autoUpdate, 
+  useClick, 
+  useDismiss, 
+  useRole, 
+  useInteractions 
+} from '@floating-ui/react';
 
 export default { title: 'React: FloatingOverlay' };
 

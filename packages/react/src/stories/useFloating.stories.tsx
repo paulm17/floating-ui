@@ -6,36 +6,47 @@ import {
   shift,
   arrow,
 } from "@floating-ui/react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 export default { title: 'React: useFloating' };
 
 export function UseFloating() {
   const [isOpen, setIsOpen] = useState(false);
-  const [arrowRef, setArrowRef] = useState(null);
+  const arrowRef = useRef(null);
 
   const { refs, floatingStyles, placement, middlewareData } = useFloating({
-    open: () => isOpen,
+    open: isOpen,
     onOpenChange: setIsOpen,
     middleware: [
       offset(10),
       flip(),
-      shift({ 'padding': '8px' }),
-      arrow({ element: arrowRef }),
+      shift({ padding: 8 }),
+      arrow({ element: arrowRef.current }),
     ],
     whileElementsMounted: autoUpdate,
     placement: "top",
-  });
+  });  
 
   // Arrow positioning
   const arrowX = middlewareData.arrow?.x;
   const arrowY = middlewareData.arrow?.y;
+  // Determine which side is “static” (where the arrow base should sit)
   const staticSide = {
     top: "bottom",
     right: "left",
     bottom: "top",
     left: "right",
-  }[placement.split("-")[0]];
+  }[placement.split("-")[0] as "top" | "right" | "bottom" | "left"];
+
+  // Build a CSSProperties object for the arrow, then inject [staticSide]:
+  const arrowStyle: React.CSSProperties = {
+    position: "absolute",
+    left:     arrowX != null ? `${arrowX}px` : undefined,
+    top:      arrowY != null ? `${arrowY}px` : undefined,
+    // We can’t directly write [staticSide] here because TS won’t allow it in JSX
+  };
+  // Assign the dynamic property (e.g. “bottom: -4px” or “left: -4px”)
+  (arrowStyle as any)[staticSide] = "-4px";
 
   return (
     <div className="p-24 font-sans">
@@ -79,12 +90,7 @@ export function UseFloating() {
             {/* Arrow */}
             <div
               ref={arrowRef}
-              style={{
-                position: 'absolute',
-                left: arrowX != null ? `${arrowX}px` : '',
-                top: arrowY != null ? `${arrowY}px` : '',
-                [staticSide]: '-4px',
-              }}
+              style={arrowStyle}
               className="w-2 h-2 bg-gray-800 border border-gray-600 rotate-45"
             />
           </div>
