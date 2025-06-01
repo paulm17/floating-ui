@@ -66,7 +66,7 @@ export function UseRole() {
             <FloatingPortal>
               <div
                 ref={floating.refs.setFloating}
-                style={floating.floatingStyles}
+                style={floating.floatingStyles()}
                 {...interactions.getFloatingProps()}
                 class="bg-gray-900 text-white px-3 py-2 rounded-lg shadow-lg text-sm max-w-xs z-50"
               >
