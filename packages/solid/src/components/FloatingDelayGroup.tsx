@@ -136,8 +136,6 @@ export const useDelayGroup = (
         group.setState({ delay: group.initialDelay, currentId: null });
       };
 
-      console.log('timeoutMs', group.timeoutMs)
-
       if (group.timeoutMs) {
         const t = window.setTimeout(unset, group.timeoutMs);
         onCleanup(() => {
