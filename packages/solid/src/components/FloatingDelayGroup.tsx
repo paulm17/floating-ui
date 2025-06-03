@@ -113,33 +113,30 @@ export const useDelayGroup = (
 
   // 1) When `currentId` changes, update delays and close anything that isn’t this `id`.
   createEffect(() => {
-  const { currentId, initialDelay } = group;
-  const { onOpenChange } = floatingContext();
+    if (group.currentId) {
+      // Update delay immediately
+      group.setState({
+        delay: {
+          open: 1,
+          close: getDelay(group.initialDelay, 'close'),
+        },
+      });
 
-  if (currentId) {
-    // Update delay immediately
-    group.setState({
-      delay: {
-        open: 1,
-        close: getDelay(initialDelay, 'close'),
-      },
-    });
-
-    if (currentId !== props.id) {
-      onOpenChange(false);
+      if (group.currentId !== props.id) {
+        floatingContext().onOpenChange(false);
+      }
     }
-  }
-});
+  });
 
   // 2) When this item closes but it was the `currentId`, start the timeout/unset logic.
   createEffect(() => {
-    const { open, onOpenChange } = floatingContext();
-
-    if (!open() && group.currentId === props.id) {
+    if (!floatingContext().open() && group.currentId === props.id) {
       const unset = () => {
-        onOpenChange(false);
+        floatingContext().onOpenChange(false);
         group.setState({ delay: group.initialDelay, currentId: null });
       };
+
+      console.log('timeoutMs', group.timeoutMs)
 
       if (group.timeoutMs) {
         const t = window.setTimeout(unset, group.timeoutMs);
@@ -154,8 +151,7 @@ export const useDelayGroup = (
 
   // 3) Whenever this item opens, set `currentId = props.id`. Whenever it closes, clear it.
   createEffect(() => {
-    const { open } = floatingContext();
-    if (open()) {
+    if (floatingContext().open()) {
       group.setCurrentId(props.id);
     } else {
       // If it’s closing, don’t immediately clear `currentId` here—
