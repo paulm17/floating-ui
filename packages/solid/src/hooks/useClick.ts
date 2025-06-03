@@ -98,7 +98,7 @@ export function useClick<RT extends ReferenceType = ReferenceType>(
               pointerTypeRef = event.pointerType as PointerType;
             },
             onMouseDown(event) {
-              const {dataRef} = context();
+              // const {dataRef} = context();
               // Ignore all buttons except for the "main" button.
               // https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/button
               if (event.button !== 0) {
@@ -119,8 +119,8 @@ export function useClick<RT extends ReferenceType = ReferenceType>(
               if (
                 open() &&
                 toggle() &&
-                (dataRef.openEvent
-                  ? dataRef.openEvent.type === 'mousedown'
+                (context().dataRef.openEvent
+                  ? context().dataRef.openEvent?.type === 'mousedown'
                   : true)
               ) {
                 onOpenChange(false, event);

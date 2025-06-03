@@ -98,14 +98,14 @@ export function useListItem<T>(
   },
 ) {
   const context = useFloatingListContext<T>();
-  const {register, unregister} = context;
+  // const {register, unregister} = context;
 
   createEffect(() => {
     const node = ref?.();
     if (!node) return;
     const condition = options?.registerCondition ?? (() => true);
-    if (condition()) return register(node, options?.label);
-    unregister(node);
+    if (condition()) return context.register(node, options?.label);
+    context.unregister(node);
   });
   onCleanup(() => {
     const node = ref?.();

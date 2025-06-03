@@ -84,9 +84,9 @@ export function useFloatingPortalNode(props?: {
     // if (!document || isServer) return null;
     dataRef = data();
 
-    const {id, root, portalContext, uniqueId} = dataRef;
+    // const {id, root, portalContext, uniqueId} = dataRef;
 
-    const existingIdRoot = id ? document.getElementById(id) : null;
+    const existingIdRoot = dataRef.id ? document.getElementById(dataRef.id) : null;
     const attr = createAttribute('portal');
 
     if (existingIdRoot) {
@@ -99,14 +99,14 @@ export function useFloatingPortalNode(props?: {
       return;
     }
 
-    let container = root || portalContext?.portalNode();
+    let container = dataRef.root || portalContext?.portalNode();
 
     container = container || document.body;
 
     let idWrapper: HTMLDivElement | null = null;
-    if (id) {
+    if (dataRef.id) {
       idWrapper = document.createElement('div');
-      idWrapper.id = id;
+      idWrapper.id = dataRef.id;
       container.appendChild(idWrapper);
     }
 

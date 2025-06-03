@@ -66,7 +66,8 @@ export function useTransitionStatus<RT extends ReferenceType = ReferenceType>(
   // const {
   //   open,
   // } = context;
-  const {duration = 250} = props;
+  // const {duration = 250} = props;
+  const duration = props.duration ?? 250;
 
   const closeDuration = createMemo(() => {
     const durationRef = access(duration);

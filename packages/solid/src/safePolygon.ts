@@ -47,11 +47,9 @@ interface SafePolygonOptions {
 export function safePolygon<RT extends ReferenceType = ReferenceType>(
   options: Partial<SafePolygonOptions> = {},
 ) {
-  const {
-    buffer = 0.5,
-    blockPointerEvents = false,
-    requireIntent = true,
-  } = options;
+  const buffer = options.buffer ?? 0.5;
+  const blockPointerEvents = options.blockPointerEvents ?? false;
+  const requireIntent = options.requireIntent ?? true;
 
   let timeoutId: number;
   let hasLanded = false;

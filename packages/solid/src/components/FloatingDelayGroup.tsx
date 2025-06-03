@@ -71,16 +71,14 @@ export const FloatingDelayGroup = (
 
   // Mirror React’s useModernLayoutEffect for tracking `isInstantPhase` & `currentId`
   createEffect(() => {
-    const { currentId, isInstantPhase } = state;
-
-    if (currentId) {
+    if (state.currentId) {
       if (initialCurrentIdRef === null) {
-        initialCurrentIdRef = currentId;
-      } else if (!isInstantPhase) {
+        initialCurrentIdRef = state.currentId;
+      } else if (!state.isInstantPhase) {
         setState({ isInstantPhase: true });
       }
     } else {
-      if (isInstantPhase) {
+      if (state.isInstantPhase) {
         setState({ isInstantPhase: false });
       }
       initialCurrentIdRef = null;

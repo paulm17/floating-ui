@@ -32,13 +32,15 @@ export function useFloating<R extends ReferenceElement>(
   options?: UseFloatingOptions<R>,
 ): UseFloatingReturn<R> {
   const floatingId = createUniqueId();
-  const {
-    nodeId,
-    onOpenChange: userOnOpenChange,
-    elements: optElements = {},
-    open: openProp,
-    rootContext,
-  } = options || {};
+  // const {
+  //   nodeId,
+  //   onOpenChange: userOnOpenChange,
+  //   elements: optElements = {},
+  //   open: openProp,
+  //   rootContext,
+  // } = options || {};
+
+  const optElements = options?.elements || {};
   
   // Handle accessor unwrapping for root context
   const rootElements = {
@@ -52,10 +54,10 @@ export function useFloating<R extends ReferenceElement>(
   
   // Create or use provided floating root context, without passing user callback
   const internalRoot = useFloatingRootContext({ 
-    open: access(openProp),
+    open: access(options?.open),
     elements: mergeProps({ reference: null, floating: null }, rootElements),
   });
-  const rootCtx = rootContext ?? internalRoot;
+  const rootCtx = options?.rootContext ?? internalRoot;
 
   const [_domReference, setDomReference] =
     createSignal<NarrowedElement<R> | null>(null);
@@ -81,7 +83,7 @@ export function useFloating<R extends ReferenceElement>(
       // store event for context
       dataRef.openEvent = event;
     }
-    userOnOpenChange?.(open, event);
+    options?.onOpenChange?.(open, event);
     rootCtx.onOpenChange(open, event, reason);
   };
 
@@ -120,10 +122,10 @@ export function useFloating<R extends ReferenceElement>(
     return mergeProps(
       {
         dataRef,
-        nodeId,
+        nodeId: options?.nodeId,
         floatingId,
         events,
-        open: openProp ? (() => access(openProp)) : (() => rootCtx.open),
+        open: options?.open ? (() => access(options?.open)) : (() => rootCtx.open),
         onOpenChange,
       },
       position,
@@ -136,7 +138,7 @@ export function useFloating<R extends ReferenceElement>(
   createEffect(() => {
     if (!tree?.()) return;
     rootCtx.dataRef().openEvent = dataRef.openEvent;
-    const node = tree()?.nodesRef?.find((n) => n.id === nodeId);
+    const node = tree()?.nodesRef?.find((n) => n.id === options?.nodeId);
     if (node) node.context = context() as unknown as FloatingContext<R>;
   });
 

@@ -171,7 +171,7 @@ export function FloatingFocusManager<RT extends ReferenceType = ReferenceType>(
   } = destructure(mergedProps, {normalize: true});
 
   const {open, refs, nodeId, events, dataRef} = destructure(context());
-  const {onOpenChange} = context();
+  // const {onOpenChange} = context();
 
   // Force the guards to be rendered if the `inert` attribute is not supported.
   const guards = () => (supportsInert() ? _guards() : true);
@@ -360,7 +360,7 @@ export function FloatingFocusManager<RT extends ReferenceType = ReferenceType>(
       ) {
         preventreturnFocus = true;
 
-        onOpenChange(false, event);
+        context().onOpenChange(false, event);
       }
       // });
 
@@ -548,7 +548,7 @@ export function FloatingFocusManager<RT extends ReferenceType = ReferenceType>(
       modal: modal(),
       closeOnFocusOut: closeOnFocusOut(),
       open: context().open(),
-      onOpenChange,
+      onOpenChange: context().onOpenChange,
       refs: refs(),
     });
   });
@@ -607,7 +607,7 @@ export function FloatingFocusManager<RT extends ReferenceType = ReferenceType>(
       <Show when={!disabled() || !!visuallyHiddenDismiss() || !!modal()}>
         <VisuallyHiddenDismiss
           ref={(el) => setRef(el)}
-          onClick={(event) => onOpenChange(false, event)}
+          onClick={(event) => context().onOpenChange(false, event)}
           {...btnRest}
         >
           {typeof visuallyHiddenDismiss === 'string'

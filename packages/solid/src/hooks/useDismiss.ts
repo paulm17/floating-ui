@@ -165,7 +165,7 @@ export function useDismiss<RT extends ReferenceType = ReferenceType>(
   const {open, events, nodeId} = destructure(context, {
     normalize: true,
   });
-  const {onOpenChange} = context();
+  // const {onOpenChange} = context();
   const mergedProps = mergeProps(
     defaultUseDismissProps,
     props,
@@ -240,7 +240,7 @@ export function useDismiss<RT extends ReferenceType = ReferenceType>(
       },
     });
 
-    onOpenChange(false, event);
+    context().onOpenChange(false, event);
   };
 
   const closeOnPressOutside = (event: MouseEvent) => {
@@ -371,13 +371,13 @@ export function useDismiss<RT extends ReferenceType = ReferenceType>(
       },
     });
 
-    onOpenChange(false, event);
+    context().onOpenChange(false, event);
   };
 
   let ancestors: (Element | Window | VisualViewport)[] = [];
 
   function onScroll(event: Event) {
-    onOpenChange(false, event);
+    context().onOpenChange(false, event);
   }
 
   //onMount ??
@@ -386,9 +386,9 @@ export function useDismiss<RT extends ReferenceType = ReferenceType>(
       return;
     }
 
-    const {floating, reference} = context().refs;
-    const domReference = reference() as Node | null;
-    const floatingRef = floating();
+    // const {floating, reference} = context().refs;
+    const domReference = context().refs.reference() as Node | null;
+    const floatingRef = context().refs.floating();
 
     // Wait for elements to be properly mounted in the DOM
     if (!domReference || !floatingRef) {
@@ -468,7 +468,7 @@ export function useDismiss<RT extends ReferenceType = ReferenceType>(
               data: {returnFocus: false},
             });
 
-            onOpenChange(false, event);
+            context().onOpenChange(false, event);
           }
         },
       },
