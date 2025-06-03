@@ -15,7 +15,7 @@
 //   FloatingArrow as ReactFloatingArrow
 // } from '@floating-ui/react';
 
-export default { title: 'Solid: FloatingArrow' };
+// export default { title: 'Solid: FloatingArrow' };
 
 // export function FloatingArrow() {
 //   return (
@@ -214,3 +214,296 @@ export default { title: 'Solid: FloatingArrow' };
 //     </>
 //   );
 // }
+
+import { createSignal, createEffect, onCleanup } from 'solid-js';
+import {
+  computePosition,
+  autoUpdate,
+  offset,
+  flip,
+  shift,
+  arrow
+} from '@floating-ui/dom';
+
+export default { title: 'Solid: FloatingArrow' };
+
+export function FloatingArrow() {
+  return (
+    <div class="min-h-screen bg-gray-100 p-8">
+      <div class="max-w-4xl mx-auto space-y-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-8">
+          FloatingArrow Component Test
+        </h1>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {/* Button with tooltip */}
+          <div class="flex justify-center">
+            <TooltipButton content="This is a helpful tooltip with an arrow pointing to the button!" />
+          </div>
+
+          {/* Icon with tooltip */}
+          <div class="flex justify-center">
+            <TooltipIcon content="Settings and configuration options" />
+          </div>
+
+          {/* Text with tooltip */}
+          <div class="flex justify-center">
+            <TooltipText content="This text has additional context available on hover" />
+          </div>
+
+          {/* Card with tooltip */}
+          <div class="flex justify-center">
+            <TooltipCard content="This card contains important information that you should definitely read" />
+          </div>
+
+          {/* Badge with tooltip */}
+          <div class="flex justify-center">
+            <TooltipBadge content="This indicates the current status of the system" />
+          </div>
+
+          {/* Link with tooltip */}
+          <div class="flex justify-center">
+            <TooltipLink content="Learn more about FloatingUI and its amazing features" />
+          </div>
+        </div>
+
+        <div class="mt-12 p-6 bg-white rounded-lg shadow-sm">
+          <h2 class="text-xl font-semibold text-gray-900 mb-3">
+            Test Instructions
+          </h2>
+          <ul class="space-y-2 text-gray-700">
+            <li>• Hover over any element to see the tooltip with arrow</li>
+            <li>• The arrow automatically points to the reference element</li>
+            <li>• Tooltips flip and shift to stay in viewport</li>
+            <li>• Focus elements with keyboard navigation</li>
+            <li>• Click outside or press Escape to dismiss</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Generic tooltip hook for SolidJS
+function createTooltip(content) {
+  const [isOpen, setIsOpen] = createSignal(false);
+  let referenceEl;
+  let floatingEl;
+  let arrowEl;
+  let cleanup;
+
+  const updatePosition = async () => {
+    if (!referenceEl || !floatingEl || !arrowEl) return;
+
+    const { x, y, placement, middlewareData } = await computePosition(
+      referenceEl,
+      floatingEl,
+      {
+        middleware: [
+          offset(10),
+          flip(),
+          shift(),
+          arrow({ element: arrowEl }),
+        ],
+      }
+    );
+
+    Object.assign(floatingEl.style, {
+      left: `${x}px`,
+      top: `${y}px`,
+    });
+
+    // Position the arrow
+    const { x: arrowX, y: arrowY } = middlewareData.arrow || {};
+    const staticSide = {
+      top: 'bottom',
+      right: 'left',
+      bottom: 'top',
+      left: 'right',
+    }[placement.split('-')[0]];
+
+    Object.assign(arrowEl.style, {
+      left: arrowX != null ? `${arrowX}px` : '',
+      top: arrowY != null ? `${arrowY}px` : '',
+      right: '',
+      bottom: '',
+      [staticSide]: '-4px',
+    });
+  };
+
+  createEffect(() => {
+    if (isOpen() && referenceEl && floatingEl) {
+      cleanup = autoUpdate(referenceEl, floatingEl, updatePosition);
+    }
+  });
+
+  onCleanup(() => {
+    if (cleanup) cleanup();
+  });
+
+  const handleMouseEnter = () => setIsOpen(true);
+  const handleMouseLeave = () => setIsOpen(false);
+  const handleFocus = () => setIsOpen(true);
+  const handleBlur = () => setIsOpen(false);
+  const handleKeyDown = (e) => {
+    if (e.key === 'Escape') setIsOpen(false);
+  };
+
+  const referenceProps = {
+    onMouseEnter: handleMouseEnter,
+    onMouseLeave: handleMouseLeave,
+    onFocus: handleFocus,
+    onBlur: handleBlur,
+    onKeyDown: handleKeyDown,
+    ref: (el) => (referenceEl = el),
+  };
+
+  const FloatingComponent = () => (
+    <div
+      ref={(el) => (floatingEl = el)}
+      class="bg-gray-900 text-white px-3 py-2 rounded-lg shadow-lg text-sm max-w-xs z-50 fixed"
+      role="tooltip"
+      style={{ display: isOpen() ? 'block' : 'none' }}
+    >
+      <div
+        ref={(el) => (arrowEl = el)}
+        class="absolute w-2 h-2 bg-gray-900 rotate-45"
+      />
+      {content}
+    </div>
+  );
+
+  return { referenceProps, FloatingComponent, isOpen };
+}
+
+// Button with tooltip
+function TooltipButton(props) {
+  const { referenceProps, FloatingComponent } = createTooltip(props.content);
+
+  return (
+    <>
+      <button
+        {...referenceProps}
+        class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+      >
+        Hover me
+      </button>
+      <FloatingComponent />
+    </>
+  );
+}
+
+// Icon with tooltip
+function TooltipIcon(props) {
+  const { referenceProps, FloatingComponent } = createTooltip(props.content);
+
+  return (
+    <>
+      <div
+        {...referenceProps}
+        tabIndex="0"
+        class="w-12 h-12 bg-gray-600 rounded-full flex items-center justify-center cursor-pointer hover:bg-gray-700 transition-colors"
+      >
+        <svg
+          class="w-6 h-6 text-white"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width={2}
+            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+          />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width={2}
+            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+          />
+        </svg>
+      </div>
+      <FloatingComponent />
+    </>
+  );
+}
+
+// Text with tooltip
+function TooltipText(props) {
+  const { referenceProps, FloatingComponent } = createTooltip(props.content);
+
+  return (
+    <>
+      <span
+        {...referenceProps}
+        tabIndex="0"
+        class="text-blue-600 underline cursor-help"
+      >
+        Hover for more info
+      </span>
+      <FloatingComponent />
+    </>
+  );
+}
+
+// Card with tooltip
+function TooltipCard(props) {
+  const { referenceProps, FloatingComponent } = createTooltip(props.content);
+
+  return (
+    <>
+      <div
+        {...referenceProps}
+        tabIndex="0"
+        class="bg-white p-4 rounded-lg shadow-md cursor-pointer hover:shadow-lg transition-shadow"
+      >
+        <h3 class="font-semibold text-gray-900">Info Card</h3>
+        <p class="text-gray-600 text-sm">Hover to see tooltip</p>
+      </div>
+      <FloatingComponent />
+    </>
+  );
+}
+
+// Badge with tooltip
+function TooltipBadge(props) {
+  const { referenceProps, FloatingComponent } = createTooltip(props.content);
+
+  return (
+    <>
+      <span
+        {...referenceProps}
+        tabIndex="0"
+        class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 cursor-help"
+      >
+        Active
+      </span>
+      <FloatingComponent />
+    </>
+  );
+}
+
+// Link with tooltip
+function TooltipLink(props) {
+  const { referenceProps, FloatingComponent } = createTooltip(props.content);
+
+  const handleClick = (e) => {
+    e.preventDefault();
+    referenceProps.onMouseLeave?.();
+  };
+
+  return (
+    <>
+      <a
+        {...referenceProps}
+        href="#"
+        class="text-purple-600 hover:text-purple-700 font-medium underline"
+        onClick={handleClick}
+      >
+        Documentation Link
+      </a>
+      <FloatingComponent />
+    </>
+  );
+}
