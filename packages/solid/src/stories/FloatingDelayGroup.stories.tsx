@@ -108,11 +108,10 @@ function Tooltip({ children, content }: any) {
   });
 
   const groupContext = useDelayGroup(floating.context, { id: content });
-  const { delay } = groupContext;
 
   const hover = useHover(floating.context, {
     move: false,
-    delay: delay,
+    delay: groupContext.delay,
   });
   const focus = useFocus(floating.context);
   const dismiss = useDismiss(floating.context);

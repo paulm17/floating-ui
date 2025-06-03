@@ -75,17 +75,17 @@ const MenuItem = ({ label, children, nodeId }: any) => {
   const hover = useHover(floating.context, {
     handleClose: safePolygon({
       buffer: 8,
-      blockPointerEvents: true,    // ← must be true so the “triangle” blocks pointer events
+      blockPointerEvents: true,    
     }),
     delay: { open: 150, close: 500 },
-    restMs: 50,                    // ← give the submenu time to mount
+    restMs: 50,                    
   });
-  // const dismiss = useDismiss(floating.context);
+  const dismiss = useDismiss(floating.context);
   const role = useRole(floating.context, { role: 'menu' });
 
   const interactions = useInteractions([
     hover,
-    // dismiss,
+    dismiss,
     role,
   ]);
 
@@ -131,18 +131,18 @@ const Menu = ({ isOpen, setIsOpen, nodeId }: any) => {
   const hover = useHover(floating.context, {
     handleClose: safePolygon({
       buffer: 8,
-      blockPointerEvents: true,    // ← again: must be true at the root level
+      blockPointerEvents: true,
     }),
     delay: { open: 150, close: 500 },
     restMs: 50,
   });
-  // const dismiss = useDismiss(floating.context);
-  // const role = useRole(floating.context, { role: 'menu' });
+  const dismiss = useDismiss(floating.context);
+  const role = useRole(floating.context, { role: 'menu' });
 
   const interactions = useInteractions([
     hover,
-    // dismiss,
-    // role,
+    dismiss,
+    role,
   ]);
 
   return (
