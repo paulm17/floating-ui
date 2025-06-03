@@ -7,7 +7,7 @@ import {
 } from '@floating-ui/dom';
 import {isElement} from '@floating-ui/utils/dom';
 import {access} from '@solid-primitives/utils';
-import {createEffect, createMemo, createSignal} from 'solid-js';
+import {createEffect, createMemo, createSignal, onCleanup} from 'solid-js';
 
 import {
   ExtendedPositionElements,
@@ -129,25 +129,59 @@ export function usePosition<R extends ReferenceElement = ReferenceElement>(
     if (currentReference && currentFloating) {
       update();
     }
+  });
 
-    // onCleanup(() => {
-    //   if (
-    //     currentReference &&
-    //     currentFloating &&
-    //     options?.whileElementsMounted
-    //   ) {
-    //     console.log('#########', {currentFloating, currentReference});
-    //     // return;
-    //     const cleanup = options.whileElementsMounted?.(
-    //       currentReference,
-    //       currentFloating,
-    //       update
-    //     );
-    //     if (cleanup) {
-    //       onCleanup(cleanup);
-    //     }
-    //   }
-    // });
+  // Separate effect for whileElementsMounted to ensure proper cleanup
+  createEffect(() => {
+    const currentReference = reference();
+    const currentFloating = floating();
+
+    const isValidReference = currentReference && (
+      isElement(currentReference) || 
+      (typeof currentReference === 'object' && 
+       typeof currentReference.getBoundingClientRect === 'function')
+    );
+
+    const isValidFloating = currentFloating && isElement(currentFloating);
+
+    if (
+      isValidReference && 
+      isValidFloating && 
+      options?.whileElementsMounted
+    ) {
+      const referenceConnected = isElement(currentReference) ? 
+        currentReference.isConnected : true;
+      const floatingConnected = currentFloating.isConnected;
+
+      if (referenceConnected && floatingConnected) {
+        try {
+          const cleanup = options.whileElementsMounted(
+            currentReference,
+            currentFloating,
+            update
+          );
+
+          if (cleanup && typeof cleanup === 'function') {
+            onCleanup(cleanup);
+          }
+        } catch (error) {
+          console.error('Error in whileElementsMounted:', error);
+
+          // Fallback to manual resize listener if autoUpdate fails
+          console.log('Falling back to manual resize listener');
+          const handleResize = () => update();
+          const handleScroll = () => update();
+
+          window.addEventListener('resize', handleResize);
+          window.addEventListener('scroll', handleScroll, true);
+
+          onCleanup(() => {
+            window.removeEventListener('resize', handleResize);
+            window.removeEventListener('scroll', handleScroll, true);
+          });
+        }
+      }
+    }
   });
 
   const floatingStyles = () => {

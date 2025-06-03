@@ -27,11 +27,11 @@ export interface UseFloatingRootContextOptions {
 export function useFloatingRootContext(
   options: UseFloatingRootContextOptions,
 ): FloatingRootContext {
-  const {
-    open = false,
-    onOpenChange: onOpenChangeProp,
-    elements: elementsProp,
-  } = options;
+  // const {
+  //   open = false,
+  //   onOpenChange: onOpenChangeProp,
+  //   elements: elementsProp,
+  // } = options;
 
   // Solid’s unique ID generator
   const floatingId = createUniqueId();
@@ -48,7 +48,7 @@ export function useFloatingRootContext(
   // DEV‐only sanity check (identical to React version)
   // @ts-ignore
   if (__DEV__) {
-    const optionDomReference = elementsProp.reference;
+    const optionDomReference = options.elements.reference;
     if (optionDomReference && !isElement(optionDomReference)) {
       error(
         'Cannot pass a virtual element to the `elements.reference` option,',
@@ -60,7 +60,7 @@ export function useFloatingRootContext(
 
   // positionReference ↔ useState
   const [positionReference, setPositionReference] = createSignal<ReferenceElement | null>(
-    elementsProp.reference
+    options.elements.reference
   );
 
   // Directly define a stable callback for onOpenChange
@@ -81,7 +81,7 @@ export function useFloatingRootContext(
     });
 
     // Forward to the user’s callback, if provided
-    onOpenChangeProp?.(nextOpen, event, reason);
+    options.onOpenChange?.(nextOpen, event, reason);
   };
 
   // “refs” object (only contains setPositionReference)
@@ -91,16 +91,16 @@ export function useFloatingRootContext(
 
   // Recompute `elements` whenever positionReference or elementsProp changes
   const elements = createMemo(() => ({
-    reference: positionReference() || elementsProp.reference || null,
-    floating: elementsProp.floating || null,
-    domReference: (elementsProp.reference as Element) || null,
+    reference: positionReference() || options.elements.reference || null,
+    floating: options.elements.floating || null,
+    domReference: (options.elements.reference as Element) || null,
   }));
 
   // Return a single context object. We wrap it in createMemo so that
   // if `open` or `elements()` change, downstream users can react.
   return createMemo<FloatingRootContext>(() => ({
     dataRef: () => dataRef,
-    open,
+    open: options.open ?? false,
     onOpenChange,
     elements: elements(),
     events,

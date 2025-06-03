@@ -1004,6 +1004,7 @@ export function useListNavigation<RT extends ReferenceType = ReferenceType>(
 
           const isNavigationKey =
             isArrowKey || event.key === 'Enter' || event.key.trim() === '';
+          // const isMainKey = isMainOrientationKey(event.key, orientation);
           const isMainKey = isMainOrientationToEndKey(
             event.key,
             orientation,
@@ -1018,10 +1019,23 @@ export function useListNavigation<RT extends ReferenceType = ReferenceType>(
           if (isNavigationKey) {
             keyRef = nested() && isMainKey ? null : event.key;
           }
+          /* console.log({nested: nested(), isCrossKey}); */
 
           if (nested()) {
             if (isCrossKey) {
               stopEvent(event);
+
+              // if (open()) {
+              //   indexRef = getMinIndex(listRef, disabledIndicesRef);
+              //   /* console.log(
+              //     'reference - onKeydown --- nested --- now onNavigate to',
+              //     indexRef
+              //   ); */
+
+              //   onNavigate(indexRef);
+              // } else {
+              //   onOpenChange(true, event);
+              // }
               if (!open()) {
                 onOpenChange(true, event);
               }
@@ -1040,20 +1054,19 @@ export function useListNavigation<RT extends ReferenceType = ReferenceType>(
 
             if (!open() && openOnArrowKeyDown()) {
               onOpenChange(true, event);
+              //addde MR because opening resets the indexRef through effect which are immediately triggered
               indexRef =
                 (selectedIndex() as number) ??
                 getMinIndex(listRef, disabledIndicesRef);
+
               onNavigate(indexRef);
             } else if (open()) {
-              // Moved inside else-if to ensure navigation works when open
               onKeyDown(event);
-            }
+            }            
           }
         },
-        // ... rest of reference props ...
       },
       floating: {
-        // Add tabIndex to make floating element focusable
         tabIndex: -1,
         'aria-orientation':
           orientation() === 'both'
@@ -1068,7 +1081,7 @@ export function useListNavigation<RT extends ReferenceType = ReferenceType>(
       item: {
         ...item(),
         // Ensure items are focusable
-        tabIndex: -1
+        tabIndex: 0
       },
     };
   });

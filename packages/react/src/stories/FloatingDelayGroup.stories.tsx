@@ -58,31 +58,30 @@ export function FloatingDelayGroup() {
               </button>
             </Tooltip>
           </div>
+          <div className="mt-12 space-y-4">
+            <h2 className="text-xl font-semibold text-gray-800">
+              Comparison: Tooltips Outside Delay Group
+            </h2>
+            <p className="text-gray-600">
+              These tooltips below are not in a delay group, so each one has the full delay:
+            </p>
+            
+            <div className="flex flex-wrap gap-4">
+              <Tooltip content="This tooltip always has the full delay" useDelayGroup={false}>
+                <button className="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                  Independent tooltip 1
+                </button>
+              </Tooltip>
+              
+              <Tooltip content="This one also has the full delay every time" useDelayGroup={false}>
+                <button className="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                  Independent tooltip 2
+                </button>
+              </Tooltip>
+            </div>
+          </div>
         </ReactFloatingDelayGroup>
-      </div>
-      
-      <div className="mt-12 space-y-4">
-        <h2 className="text-xl font-semibold text-gray-800">
-          Comparison: Tooltips Outside Delay Group
-        </h2>
-        <p className="text-gray-600">
-          These tooltips below are not in a delay group, so each one has the full delay:
-        </p>
-        
-        <div className="flex flex-wrap gap-4">
-          <Tooltip content="This tooltip always has the full delay">
-            <button className="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-              Independent tooltip 1
-            </button>
-          </Tooltip>
-          
-          <Tooltip content="This one also has the full delay every time">
-            <button className="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-              Independent tooltip 2
-            </button>
-          </Tooltip>
-        </div>
-      </div>
+      </div>      
       
       <div className="mt-8 p-4 bg-blue-50 rounded-lg">
         <h3 className="text-lg font-medium text-blue-900 mb-2">How it works:</h3>
@@ -100,7 +99,6 @@ export function FloatingDelayGroup() {
 
 function Tooltip({ children, content }: any) {
   const [isOpen, setIsOpen] = useState(false);
-  const { delay } = useDelayGroupContext();
 
   const { refs, floatingStyles, context } = useFloating({
     open: isOpen,
@@ -108,6 +106,9 @@ function Tooltip({ children, content }: any) {
     middleware: [offset(5), flip(), shift()],
     whileElementsMounted: autoUpdate,
   });
+
+  const groupContext = useDelayGroup(context, { id: content });
+  const { delay } = groupContext;
 
   const hover = useHover(context, {
     move: false,
@@ -123,8 +124,6 @@ function Tooltip({ children, content }: any) {
     dismiss,
     role,
   ]);
-
-  useDelayGroup(context, { id: content });
 
   return (
     <>

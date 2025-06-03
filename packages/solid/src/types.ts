@@ -142,7 +142,7 @@ export type UseFloatingOptions<R extends ReferenceType = ReferenceType> =
        * (layout) in the `floatingStyles` object.
        */
       transform?: boolean;
-      onOpenChange?: (open: boolean, event?: Event) => void;
+      onOpenChange?: (open: boolean, event?: Event, reason?: OpenChangeReason) => void;
       nodeId?: string;
     }
   >;

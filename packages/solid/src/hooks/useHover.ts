@@ -21,6 +21,7 @@ import type {
 import {contains, getDocument} from '../utils/element';
 import {isMouseLikePointerType} from '../utils/event';
 import {createAttribute} from '../utils/createAttribute';
+import {clearTimeoutIfSet} from '../utils/clearTimeoutIfSet';
 import {destructure} from '../utils/destructure';
 
 const safePolygonIdentifier = createAttribute('safe-polygon');
@@ -180,7 +181,7 @@ export function useHover<RT extends ReferenceType = ReferenceType>(
 
     function onLeave(event: MouseEvent) {
       if (isHoverOpen()) {
-        onOpenChange(false, event);
+        onOpenChange(false, event, 'hover');
       }
     }
 
@@ -192,7 +193,7 @@ export function useHover<RT extends ReferenceType = ReferenceType>(
   });
 
   const closeWithDelay = (event: Event, runElseBranch = true, reason: OpenChangeReason = 'hover') => {
-    const closeDelay = getDelay(delay, 'close', pointerTypeRef);
+    const closeDelay = getDelay(delay(), 'close', pointerTypeRef);
     if (closeDelay && !handlerRef) {
       clearTimeout(timeoutRef);
 
@@ -209,7 +210,7 @@ export function useHover<RT extends ReferenceType = ReferenceType>(
     handlerRef = undefined;
   };
 
-  const clearPointerEvents = () => {
+  const clearPointerEvents = () => {    
     if (performedPointerEventsMutationRef) {
       const body = getDocument(refs.floating()).body;
       body.style.pointerEvents = '';
@@ -218,21 +219,21 @@ export function useHover<RT extends ReferenceType = ReferenceType>(
     }
   };
 
+  function isClickLikeOpenEvent() {
+    return context().dataRef.openEvent
+      ? ['click', 'mousedown'].includes(
+          context()?.dataRef?.openEvent?.type ?? '',
+        )
+      : false;
+  }
+
   // Registering the mouse events on the reference directly to bypass React's
   // delegation system. If the cursor was on a disabled element and then entered
   // the reference (no gap), `mouseenter` doesn't fire in the delegation system.
   createEffect(() => {
     if (!enabled()) {
       return;
-    }
-
-    function isClickLikeOpenEvent() {
-      return context().dataRef.openEvent
-        ? ['click', 'mousedown'].includes(
-            context()?.dataRef?.openEvent?.type ?? '',
-          )
-        : false;
-    }
+    }    
 
     function onMouseEnter(event: MouseEvent) {
       clearTimeout(timeoutRef);
@@ -240,23 +241,24 @@ export function useHover<RT extends ReferenceType = ReferenceType>(
 
       if (
         (mouseOnly() && !isMouseLikePointerType(pointerTypeRef)) ||
-        (restMs() > 0 && getDelay(delay, 'open') === 0)
+        (getRestMs(restMs()) > 0 && getDelay(delay(), 'open') === 0)
       ) {
         return;
       }
 
-      const openDelay = getDelay(delay, 'open', pointerTypeRef);
+      const openDelay = getDelay(delay(), 'open', pointerTypeRef);
       if (openDelay) {
         timeoutRef = setTimeout(() => {
-          onOpenChange(true, event);
+          onOpenChange(true, event, 'hover');
         }, openDelay);
       } else {
-        onOpenChange(true, event);
+        onOpenChange(true, event, 'hover');
       }
     }
 
-    function onMouseLeave(event: MouseEvent) {
+    function onMouseLeave(event: MouseEvent) {      
       if (isClickLikeOpenEvent()) {
+        clearPointerEvents();
         return;
       }
 
@@ -280,7 +282,9 @@ export function useHover<RT extends ReferenceType = ReferenceType>(
             clearPointerEvents();
             cleanupMouseMoveHandler();
             // Should the event expose that it was closed by `safePolygon`?
-            closeWithDelay(event);
+            if (!isClickLikeOpenEvent()) {
+              closeWithDelay(event, true, 'safe-polygon');
+            }
           },
         });
 
@@ -323,26 +327,61 @@ export function useHover<RT extends ReferenceType = ReferenceType>(
           clearPointerEvents();
           cleanupMouseMoveHandler();
 
-          closeWithDelay(event);
+          if (!isClickLikeOpenEvent()) {
+            closeWithDelay(event);
+          }
         },
       })(event);
     }
 
+    function onFloatingMouseEnter() {
+      clearTimeoutIfSet(timeoutRef);
+    }
+
+    function onFloatingMouseLeave(event: MouseEvent) {
+      if (!isClickLikeOpenEvent()) {
+        closeWithDelay(event, false);
+      }
+    }
+
     if (isElement(refs.reference())) {
       const ref = refs.reference() as unknown as HTMLElement;
+      const floating = refs.floating();
 
-      open() && ref.addEventListener('mouseleave', onScrollMouseLeave);
-      refs.floating()?.addEventListener('mouseleave', onScrollMouseLeave);
-      move() && ref.addEventListener('mousemove', onMouseEnter, {once: true});
+      if (open()) {
+        ref.addEventListener('mouseleave', onScrollMouseLeave);
+      }
+
+      if (move()) {
+        ref.addEventListener('mousemove', onMouseEnter, {once: true});
+      }
+
       ref.addEventListener('mouseenter', (e) => onMouseEnter(e));
       ref.addEventListener('mouseleave', (e) => onMouseLeave(e));
 
+      if (floating) {
+        refs.floating()?.addEventListener('mouseleave', onScrollMouseLeave);
+        refs.floating()?.addEventListener('mouseenter', onFloatingMouseEnter);
+        refs.floating()?.addEventListener('mouseleave', onFloatingMouseLeave);
+      }
+
       onCleanup(() => {
-        open() && ref.removeEventListener('mouseleave', onScrollMouseLeave);
-        refs.floating()?.removeEventListener('mouseleave', onScrollMouseLeave);
-        move() && ref.removeEventListener('mousemove', onMouseEnter);
+        if (open()) {
+          ref.removeEventListener('mouseleave', onScrollMouseLeave);
+        }
+
+        if (move()) {
+          ref.removeEventListener('mousemove', onMouseEnter);
+        }
+
         ref.removeEventListener('mouseenter', onMouseEnter);
         ref.removeEventListener('mouseleave', onMouseLeave);
+
+        if (floating) {
+          refs.floating()?.removeEventListener('mouseleave', onScrollMouseLeave);
+          refs.floating()?.addEventListener('mouseenter', onFloatingMouseEnter);
+          refs.floating()?.addEventListener('mouseleave', onFloatingMouseLeave);
+        }
       });
     }
   });
@@ -363,26 +402,32 @@ export function useHover<RT extends ReferenceType = ReferenceType>(
     ) {
       const floating = refs.floating();
       const domReference = refs.reference();
-      const body = getDocument(floating).body;
-      body.setAttribute(safePolygonIdentifier, '');
-      body.style.pointerEvents = 'none';
-      performedPointerEventsMutationRef = true;
 
       if (isElement(domReference) && floating) {
+        const doc = floating ? getDocument(floating) : null;
+        const body = doc ? doc.body : null;
+        // Guard against null body/node
+        if (!body) return;
+        body.setAttribute(safePolygonIdentifier, '');
+        performedPointerEventsMutationRef = true;
+      
         const ref = domReference as unknown as HTMLElement | SVGSVGElement;
 
-        const parentFloating = tree?.()
-          ?.nodesRef.find((node) => node.id === parentId)
+        const parentFloating = tree
+          ?.()
+          .nodesRef.find((node) => node.id === parentId)
           ?.context?.refs.floating();
 
         if (parentFloating) {
           parentFloating.style.pointerEvents = '';
         }
 
+        body.style.pointerEvents = 'none';
         ref.style.pointerEvents = 'auto';
         floating.style.pointerEvents = 'auto';
 
         onCleanup(() => {
+          body.style.pointerEvents = '';
           ref.style.pointerEvents = '';
           floating.style.pointerEvents = '';
         });
@@ -420,15 +465,15 @@ export function useHover<RT extends ReferenceType = ReferenceType>(
         onPointerDown: setPointerRef,
         onPointerEnter: setPointerRef,
         onMouseMove(event: MouseEvent) {
-          if (open() || restMs() === 0) {
+          if (open() || getRestMs(restMs()) === 0) {
             return;
           }
           clearTimeout(restTimeoutRef);
           restTimeoutRef = setTimeout(() => {
             if (!blockMouseMoveRef) {
-              onOpenChange(true, event);
+              onOpenChange(true, event, 'hover');
             }
-          }, restMs());
+          }, getRestMs(restMs()));
         },
       },
       floating: {

@@ -437,35 +437,34 @@ export function FloatingFocusManager<RT extends ReferenceType = ReferenceType>(
 
     // Wait for any layout effect state setters to execute to set `tabIndex`.
     const initialFocusValue = initialFocus();
-    // queueMicrotask(
-    // 	() => {
-    const focusableElements = getTabbableElements(floating);
+    queueMicrotask(() => {
+      const focusableElements = getTabbableElements(floating);
 
-    const elToFocus =
-      (typeof initialFocusValue === 'number'
-        ? focusableElements[initialFocusValue]
-        : initialFocusValue) || floating;
-    const focusAlreadyInsideFloatingEl = contains(
-      floating,
-      previouslyFocusedElement,
-    );
+      const elToFocus =
+        (typeof initialFocusValue === 'number'
+          ? focusableElements[initialFocusValue]
+          : initialFocusValue) || floating;
+      const focusAlreadyInsideFloatingEl = contains(
+        floating,
+        previouslyFocusedElement,
+      );
 
-    if (!ignoreInitialFocus() && !focusAlreadyInsideFloatingEl && open()) {
-      // console.log(
-      //   'FOCUSMANAGER - Wait for any layout effect state setters to execute to set `tabIndex`. - enqueueFocus - elToFocus',
-      //   {
-      //     elToFocus,
-      //     focusableElements,
-      //     initialFocusValue,
-      //     focusAlreadyInsideFloatingEl,
-      //     ignoreInitialFocus: ignoreInitialFocus(),
-      //     previouslyFocusedElement,
-      //   },
-      // );
+      if (!ignoreInitialFocus() && !focusAlreadyInsideFloatingEl && open()) {
+        // console.log(
+        //   'FOCUSMANAGER - Wait for any layout effect state setters to execute to set `tabIndex`. - enqueueFocus - elToFocus',
+        //   {
+        //     elToFocus,
+        //     focusableElements,
+        //     initialFocusValue,
+        //     focusAlreadyInsideFloatingEl,
+        //     ignoreInitialFocus: ignoreInitialFocus(),
+        //     previouslyFocusedElement,
+        //   },
+        // );
 
-      enqueueFocus(elToFocus, {preventScroll: elToFocus === floating});
-    }
-    // });
+        enqueueFocus(elToFocus, {preventScroll: elToFocus === floating});
+      }
+    });
   });
 
   createEffect(() => {

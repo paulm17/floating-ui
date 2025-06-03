@@ -1,4 +1,3 @@
-// import React, { useState, useRef } from 'react';
 // import {
 //   useFloating,
 //   autoUpdate,
@@ -11,28 +10,12 @@
 //   useInteractions,
 //   FloatingFocusManager,
 //   useListNavigation,
-//   FloatingList as ReactFloatingList,
+//   FloatingList as SolidFloatingList,
 //   useListItem,
-// } from '@floating-ui/react';
+// } from '@floating-ui/solid';
+// import { createSignal } from 'solid-js';
 
 export default { title: 'Solid: FloatingList' };
-
-// // Helper to merge multiple refs into one callback ref
-// function mergeRefs<T>(
-//   ...refs: Array<React.Ref<T> | undefined>
-// ): React.RefCallback<T> {
-//   return (node: T | null) => {
-//     refs.forEach((ref) => {
-//       if (!ref) return;
-//       if (typeof ref === 'function') {
-//         ref(node);
-//       } else {
-//         // @ts-ignore
-//         ref.current = node;
-//       }
-//     });
-//   };
-// }
 
 // const ListItem = React.forwardRef<HTMLDivElement, { children: React.ReactNode; active?: boolean }>(
 //   ({ children, active, ...props }, forwardedRef) => {
@@ -55,12 +38,12 @@ export default { title: 'Solid: FloatingList' };
 // );
 
 // export function FloatingList() {
-//   const [isOpen, setIsOpen] = useState(false);
-//   const [activeIndex, setActiveIndex] = useState<number | null>(null);
-//   const [selectedOption, setSelectedOption] = useState('Select an option');
+//   const [isOpen, setIsOpen] = createSignal(false);
+//   const [activeIndex, setActiveIndex] = createSignal<number | null>(null);
+//   const [selectedOption, setSelectedOption] = createSignal('Select an option');
 
 //   // Holds refs to each <ListItem> DOM node for virtual navigation
-//   const listRef = useRef<Array<HTMLElement | null>>([]);
+//   const [listRef, setListRef] = createSignal<Array<HTMLElement | null>>([]);
 
 //   const options = [
 //     'Apple',
@@ -72,25 +55,25 @@ export default { title: 'Solid: FloatingList' };
 //     'Grape',
 //   ];
 
-//   const { refs, floatingStyles, context } = useFloating({
+//   const floating = useFloating({
 //     open: isOpen,
 //     onOpenChange: setIsOpen,
 //     middleware: [offset(5), flip(), shift()],
 //     whileElementsMounted: autoUpdate,
 //   });
 
-//   const click = useClick(context);
-//   const dismiss = useDismiss(context);
-//   const role = useRole(context, { role: 'listbox' });
-//   const listNav = useListNavigation(context, {
-//     listRef,
+//   const click = useClick(floating.context);
+//   const dismiss = useDismiss(floating.context);
+//   const role = useRole(floating.context, { role: 'listbox' });
+//   const listNav = useListNavigation(floating.context, {
+//     listRef: listRef(),
 //     activeIndex,
 //     onNavigate: setActiveIndex,
 //     virtual: true,
 //     loop: true,
 //   });
 
-//   const { getReferenceProps, getFloatingProps, getItemProps } = useInteractions([
+//   const interactions = useInteractions([
 //     click,
 //     dismiss,
 //     role,
@@ -116,9 +99,9 @@ export default { title: 'Solid: FloatingList' };
 //           </label>
 
 //           <button
-//             ref={refs.setReference}
+//             ref={floating.refs.setReference}
 //             class="relative w-full px-4 py-2 text-left bg-white border border-gray-300 rounded-md shadow-sm hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-//             {...getReferenceProps()}
+//             {...interactions.getReferenceProps()}
 //           >
 //             <span class="block truncate">{selectedOption}</span>
 //             <span class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
@@ -128,9 +111,9 @@ export default { title: 'Solid: FloatingList' };
 //                 fill="currentColor"
 //               >
 //                 <path
-//                   fillRule="evenodd"
+//                   fill-rule="evenodd"
 //                   d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-//                   clipRule="evenodd"
+//                   clip-rule="evenodd"
 //                 />
 //               </svg>
 //             </span>
@@ -138,14 +121,14 @@ export default { title: 'Solid: FloatingList' };
 //         </div>
 
 //         {isOpen && (
-//           <FloatingFocusManager context={context} modal={false}>
+//           <FloatingFocusManager context={floating.context} modal={false}>
 //             <div
-//               ref={refs.setFloating}
-//               style={floatingStyles}
+//               ref={floating.refs.setFloating}
+//               style={floating.floatingStyles()}
 //               class="bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto z-10"
-//               {...getFloatingProps()}
+//               {...interactions.getFloatingProps()}
 //             >
-//               <ReactFloatingList elementsRef={listRef}>
+//               <SolidFloatingList elementsRef={setListRef}>
 //                 {options.map((option, index) => {
 //                   // 1) Create a temporary `any`‐typed object
 //                   const rawItemOptions: any = {
@@ -156,7 +139,7 @@ export default { title: 'Solid: FloatingList' };
 //                   };
 
 //                   // 2) Pass the `any` object into getItemProps
-//                   const itemProps = getItemProps(rawItemOptions);
+//                   const itemProps = interactions.getItemProps(rawItemOptions);
 
 //                   return (
 //                     <ListItem
@@ -168,7 +151,7 @@ export default { title: 'Solid: FloatingList' };
 //                     </ListItem>
 //                   );
 //                 })}
-//               </ReactFloatingList>
+//               </SolidFloatingList>
 //             </div>
 //           </FloatingFocusManager>
 //         )}

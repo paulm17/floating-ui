@@ -67,10 +67,7 @@ export interface UseTypeaheadProps {
 /**
  * Provides a matching callback that can be used to focus an item as the user
  * types, often used in tandem with `useListNavigation()`.
- * 
- * **Changes from original:**
- *  1. On `context().open() === true`, immediately call `refs.floating.focus()`.
- *  2. Add `tabIndex: -1` to the floating props so it can be focused.
+ * @see https://floating-ui.com/docs/useTypeahead
  */
 export function useTypeahead<RT extends ReferenceType = ReferenceType>(
   context: Accessor<FloatingContext<RT>>,
@@ -98,22 +95,24 @@ export function useTypeahead<RT extends ReferenceType = ReferenceType>(
 
   const {listRef, activeIndex, ignoreKeys, enabled, resetMs, selectedIndex} =
     destructure(mergedProps, {normalize: true});
+  // const {onTypingChange, findMatch, onMatch} = destructure(local, {
+  //   normalize: true,
+  // });
 
   let timeoutIdRef: number | ReturnType<typeof setTimeout>;
   let stringRef = '';
   let prevIndexRef: number | null = selectedIndex() ?? activeIndex() ?? -1;
   let matchIndexRef: number | null = null;
 
-  // Whenever the menu opens, reset typeahead state AND focus the floating element.
   createEffect(() => {
     if (context().open()) {
-      // Clear any leftover typing state
       clearTimeout(timeoutIdRef);
       matchIndexRef = null;
       stringRef = '';
 
       // Only focus the floating container if no item is already active.
-      if (activeIndex() == null) {
+      //if (activeIndex() === null) {
+      if (prevIndexRef === 0) {
         const floatingEl = context().refs.floating();
         if (floatingEl) {
           // Delay so the element is mounted first
@@ -124,7 +123,7 @@ export function useTypeahead<RT extends ReferenceType = ReferenceType>(
   });
 
   createEffect(() => {
-    // Sync arrow‐key navigation but not typeahead navigation.
+    // Sync arrow key navigation but not typeahead navigation.
     if (context().open() && stringRef === '') {
       prevIndexRef = selectedIndex() ?? activeIndex() ?? -1;
     }
@@ -136,7 +135,6 @@ export function useTypeahead<RT extends ReferenceType = ReferenceType>(
       local.onTypingChange?.(value);
     }
   }
-
   function getMatchingIndex(
     list: Array<string | null>,
     orderedList: Array<string | null>,
@@ -146,8 +144,7 @@ export function useTypeahead<RT extends ReferenceType = ReferenceType>(
       ? local.findMatch(orderedList, string)
       : orderedList.find(
           (text) =>
-            text?.toLocaleLowerCase().indexOf(string.toLocaleLowerCase()) ===
-            0,
+            text?.toLocaleLowerCase().indexOf(string.toLocaleLowerCase()) === 0,
         );
 
     return str ? list.indexOf(str) : -1;
@@ -167,9 +164,9 @@ export function useTypeahead<RT extends ReferenceType = ReferenceType>(
     if (
       listContent() == null ||
       ignoreKeys().includes(event.key) ||
-      // Character key?
+      // Character key.
       event.key.length !== 1 ||
-      // Modifier key?
+      // Modifier key.
       event.ctrlKey ||
       event.metaKey ||
       event.altKey
@@ -182,14 +179,16 @@ export function useTypeahead<RT extends ReferenceType = ReferenceType>(
       setTypingChange(true);
     }
 
-    // Allow rapid succession of the same first letter only if no two items
-    // start with the same letter.
+    // Bail out if the list contains a word like "llama" or "aaron". TODO
+    // allow it in this case, too.
     const allowRapidSuccessionOfFirstLetter = listContent().every((text) =>
       text
         ? text[0]?.toLocaleLowerCase() !== text[1]?.toLocaleLowerCase()
         : true,
     );
 
+    // Allows the user to cycle through items that start with the same letter
+    // in rapid succession.
     if (allowRapidSuccessionOfFirstLetter && stringRef === event.key) {
       stringRef = '';
       prevIndexRef = matchIndexRef;
@@ -222,24 +221,18 @@ export function useTypeahead<RT extends ReferenceType = ReferenceType>(
       local.onMatch?.(index);
       matchIndexRef = index;
     } else if (event.key !== ' ') {
-      // No match: reset
+      //no match
       stringRef = '';
       setTypingChange(false);
     }
   }
 
+  // eslint-disable-next-line solid/reactivity
   return createMemo(() => {
-    if (!enabled()) {
-      return {};
-    }
+    if (!enabled()) return {};
     return {
-      reference: {
-        onKeyDown,
-      },
+      reference: {onKeyDown},
       floating: {
-        // Now that the floating container has a tabIndex, this will allow
-        // it to be focused (via the createEffect above).
-        tabIndex: -1,
         onKeyDown,
         onKeyUp(event) {
           if (event.key === ' ') {

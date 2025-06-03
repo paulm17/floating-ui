@@ -33,10 +33,6 @@ export function UseClick() {
     whileElementsMounted: autoUpdate,
   });
 
-  createEffect(() => {
-    console.log('floating', clickFloating);
-  });
-
   const click = useSolidClick(clickFloating.context);
   const dismiss = useDismiss(clickFloating.context);
   const role = useRole(clickFloating.context);

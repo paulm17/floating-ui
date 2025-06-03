@@ -245,6 +245,7 @@ export function useHover(
     if (!enabled) return;
 
     function onReferenceMouseEnter(event: MouseEvent) {
+      console.log('onReferenceMouseEnter');
       clearTimeoutIfSet(timeoutRef);
       blockMouseMoveRef.current = false;
 
@@ -274,6 +275,7 @@ export function useHover(
     }
 
     function onReferenceMouseLeave(event: MouseEvent) {
+      console.log('onReferenceMouseLeave')
       if (isClickLikeOpenEvent()) {
         clearPointerEvents();
         return;

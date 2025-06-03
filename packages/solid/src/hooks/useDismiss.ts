@@ -408,37 +408,23 @@ export function useDismiss<RT extends ReferenceType = ReferenceType>(
       doc.addEventListener(outsidePressEvent(), closeOnPressOutside);
 
     if (ancestorScroll()) {
-      // Use queueMicrotask to ensure DOM is fully updated
-      queueMicrotask(() => {
-        if (isValidElementForOverflow(domReference)) {
-          try {
-            ancestors = getOverflowAncestors(domReference);
-          } catch (error) {
-            console.warn('Error getting overflow ancestors for reference:', error);
-            ancestors = [];
-          }
+      if (isValidElementForOverflow(domReference)) {
+        try {
+          ancestors = getOverflowAncestors(domReference);
+        } catch (error) {
+          console.warn('Error getting overflow ancestors for reference:', error);
+          ancestors = [];
         }
+      }
 
-        if (isValidElementForOverflow(floatingRef)) {
-          try {
-            const floatingAncestors = getOverflowAncestors(floatingRef);
-            ancestors = ancestors.concat(floatingAncestors);
-          } catch (error) {
-            console.warn('Error getting overflow ancestors for floating element:', error);
-          }
+      if (isValidElementForOverflow(floatingRef)) {
+        try {
+          const floatingAncestors = getOverflowAncestors(floatingRef);
+          ancestors = ancestors.concat(floatingAncestors);
+        } catch (error) {
+          console.warn('Error getting overflow ancestors for floating element:', error);
         }
-
-        // Filter out visual viewport and ensure all ancestors are valid
-        ancestors = ancestors.filter(
-          (ancestor) => ancestor && ancestor !== doc.defaultView?.visualViewport,
-        );
-
-        ancestors.forEach((ancestor) => {
-          if (ancestor && typeof ancestor.addEventListener === 'function') {
-            ancestor.addEventListener('scroll', onScroll, {passive: true});
-          }
-        });
-      });
+      }
     }
 
     // Ignore the visual viewport for scrolling dismissal (allow pinch-zoom)

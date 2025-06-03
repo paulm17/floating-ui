@@ -159,12 +159,18 @@ export function useDelayGroup(
 
   useModernLayoutEffect(() => {
     function unset() {
+      console.log('unset');
       onOpenChange(false);
       setState({delay: initialDelay, currentId: null});
-    }
+    }    
 
     if (!enabled) return;
     if (!currentId) return;
+
+    console.log('open', open);
+    console.log('enabled', enabled);
+    console.log('group.currentId', currentId);
+    console.log('id', id);
 
     if (!open && currentId === id) {
       if (timeoutMs) {
@@ -190,6 +196,7 @@ export function useDelayGroup(
   useModernLayoutEffect(() => {
     if (!enabled) return;
     if (setCurrentId === NOOP || !open) return;
+    console.log('setting currentId', id);
     setCurrentId(id);
   }, [enabled, open, setCurrentId, id]);
 
