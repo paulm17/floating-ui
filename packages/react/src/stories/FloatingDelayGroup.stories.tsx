@@ -97,7 +97,7 @@ export function FloatingDelayGroup() {
   );
 }
 
-function Tooltip({ children, content }: any) {
+function Tooltip({ children, content, useDelayGroup: shouldUseDelayGroup = true }: any) {
   const [isOpen, setIsOpen] = useState(false);
 
   const { refs, floatingStyles, context } = useFloating({
@@ -107,8 +107,8 @@ function Tooltip({ children, content }: any) {
     whileElementsMounted: autoUpdate,
   });
 
-  const groupContext = useDelayGroup(context, { id: content });
-  const { delay } = groupContext;
+  const groupContext = shouldUseDelayGroup ? useDelayGroup(context, { id: content }) : null;
+  const delay = groupContext?.delay || { open: 1000, close: 200 };
 
   const hover = useHover(context, {
     move: false,
