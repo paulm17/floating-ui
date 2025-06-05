@@ -97,7 +97,7 @@ export function FloatingDelayGroup() {
   );
 }
 
-function Tooltip({ children, content }: any) {
+function Tooltip({ children, content, useDelayGroup: shouldUseDelayGroup = true }: any) {
   const [isOpen, setIsOpen] = createSignal(false);
 
   const floating = useFloating({
@@ -107,11 +107,12 @@ function Tooltip({ children, content }: any) {
     whileElementsMounted: autoUpdate,
   });
 
-  const groupContext = useDelayGroup(floating.context, { id: content });
+  const groupContext = shouldUseDelayGroup ? useDelayGroup(floating.context, { id: content }) : null;
+  const delay = groupContext?.delay || { open: 1000, close: 200 };
 
   const hover = useHover(floating.context, {
     move: false,
-    delay: groupContext.delay,
+    delay: delay,
   });
   const focus = useFocus(floating.context);
   const dismiss = useDismiss(floating.context);
